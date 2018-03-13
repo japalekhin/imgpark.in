@@ -1,0 +1,27 @@
+{
+  "name": "in.imgpark",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon --ignore static --ignore images main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/japalekhin/imgpark.git"
+  },
+  "keywords": [
+    "image",
+    "hosting"
+  ],
+  "author": "Japa Alekhin Llemos",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/japalekhin/imgpark/issues"
+  },
+  "homepage": "https://github.com/japalekhin/imgpark#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.3"
+  }
+}

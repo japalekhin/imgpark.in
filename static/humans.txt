@@ -1,0 +1,11 @@
+# humanstxt.org/
+# The humans responsible & technology colophon
+
+# TEAM
+    Japa Alekhin Llemos -- Developer -- @japalekhin (github, twitter, steem)
+
+# THANKS
+    -- no thanks
+
+# TECHNOLOGY COLOPHON
+    nginx, node.js, angularjs, normalize.css
