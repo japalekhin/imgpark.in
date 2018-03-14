@@ -7,6 +7,7 @@ let config = require('./config.js');
 
 // initialize server
 let app = express();
+app.root = path.resolve(__dirname);
 app.use(body_parser.json());
 app.use(body_parser.urlencoded({ extended: true }));
 
@@ -20,7 +21,7 @@ app.use(express.static('images'));
 require('./modules/uploader.js')(app, config.allow_test);
 
 // finally, handle home and 404
-app.all('/', (rq, rs) => rs.sendFile(path.resolve(__dirname + '/index.html')));
+app.all('/', (rq, rs) => rs.sendFile(path.resolve(app.root + '/index.html')));
 app.use((rq, rs) => rs.send('We got a 404 Jim!'));
 
 // start web server
