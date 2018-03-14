@@ -3,37 +3,95 @@ const md5 = require('md5');
 const multipart = require('connect-multiparty');
 const path = require('path');
 const request = require('request');
+const result = require('./result.js');
+const sharp = require('sharp');
 const sync = require('synchronize');
 
 module.exports = app => {
 
-    app.post('/upload', multipart(), (rq, rs) => sync.fiber(() => {
+    let upload = rq => {
+        let r = new result();
+
         if (!rq.files.hasOwnProperty('image_file')) {
-            rs.end('nope1!');
-            return;
+            return r.set_message('No image file submitted!');
         }
-
         let file = rq.files.image_file;
-
-        let data;
-        try {
-            data = sync.await(fs.readFile(file.path, sync.defer()));
-        } catch (e) {
-            console.log(e);
-            rs.end('nope2!');
-            return;
-        }
-
         if (!file.name) {
-            rs.end('nope3!');
-            return;
+            return r.set_message('No filename, weird.');
         }
 
-        let new_path = path.resolve(app.root + '/images/' + md5(file.name) + '-' + file.name);
+        // auth check here
+        if (!rq.headers.hasOwnProperty('upload-user') || !rq.headers.hasOwnProperty('upload-secret')) {
+            return r.set_message('Not authorized!');
+        }
+        let user_index = app.config.users.findIndex(user => user.user === rq.headers['upload-user']);
+        if (user_index === -1) {
+            return r.set_message('Not authorized!');
+        }
+        let user_item = app.config.users[user_index];
+        if (user_item.secret !== rq.headers['upload-secret']) {
+            return r.set_message('Access denied!');
+        }
 
-        sync.await(fs.writeFile(new_path, data, sync.defer()));
+        // check content-type
+        if (!['image/jpeg'].includes(file.headers['content-type'])) {
+            return r.set_message('Image must be a JPG or PNG! Gave `' + file.headers['content-type'] + '`.');
+        }
 
-        rs.end('ok');
+        // get image data
+        let image_data;
+        try {
+            image_data = sync.await(fs.readFile(file.path, sync.defer()));
+        } catch (e) {
+            return r.set_message('Image data can not be read!');
+        }
+
+        // resize image
+        let sim = sharp(image_data);
+        let metadata = sync.await(sim.metadata(sync.defer()));
+
+        // check content-type (AGAIN!)
+        if (!['jpeg'].includes(metadata.format)) {
+            return r.set_message('Image must be a JPG or PNG! Gave `' + metadata.format + '`.');
+        }
+
+        let extension;
+        switch (metadata.format) {
+            case 'jpeg':
+                extension = 'jpg';
+                break;
+        }
+        let now = new Date();
+
+        // prepare write path
+        let write_dir = app.root + '/images/' + now.getFullYear() + '/';
+        if (!fs.existsSync(write_dir)) {
+            fs.mkdirSync(write_dir);
+        }
+        write_dir += now.getMonth() + '/';
+        if (!fs.existsSync(write_dir)) {
+            fs.mkdirSync(write_dir);
+        }
+        write_dir += now.getDay() + '/';
+        if (!fs.existsSync(write_dir)) {
+            fs.mkdirSync(write_dir);
+        }
+        let write_filename = md5(image_data) + '.' + extension;
+        let write_path = path.resolve(write_dir + write_filename);
+
+        // resize if necessary
+        if (metadata.width > app.config.max_width || metadata.height > app.config.max_height) {
+            sim.resize(app.config.max_width, app.config.max_height).max();
+        }
+        // save file
+        sync.await(sim.toFile(write_path, sync.defer()));
+
+        r.payload.url = rq.protocol + '://' + rq.headers.host + '/' + now.getFullYear() + '/' + now.getMonth() + '/' + now.getDay() + '/' + write_filename;
+        return r.set_success(true).set_message('Upload successful!');
+    };
+
+    app.post('/upload', multipart(), (rq, rs) => sync.fiber(() => {
+        rs.send(upload(rq));
     }));
 
     if (app.config.allow_test === true) {
@@ -47,14 +105,22 @@ module.exports = app => {
                 return;
             }
 
+            if (app.config.users.length === 0) {
+                rs.send('no test user!');
+                return;
+            }
             request.post({
                 url: rq.protocol + '://' + rq.headers.host + '/upload',
+                headers: {
+                    'upload-user': app.config.users[0].user,
+                    'upload-secret': app.config.users[0].secret
+                },
                 formData: { 'image_file': fs.createReadStream(filename) }
             }, (err, response, body) => {
                 if (err) {
                     rs.send(err, response, body);
                 } else {
-                    rs.send(response);
+                    rs.send(body);
                 }
             });
 
