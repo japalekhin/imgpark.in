@@ -5,7 +5,7 @@ const path = require('path');
 const request = require('request');
 const sync = require('synchronize');
 
-module.exports = (app, allow_test) => {
+module.exports = app => {
 
     app.post('/upload', multipart(), (rq, rs) => sync.fiber(() => {
         if (!rq.files.hasOwnProperty('image_file')) {
@@ -36,7 +36,7 @@ module.exports = (app, allow_test) => {
         rs.end('ok');
     }));
 
-    if (allow_test === true) {
+    if (app.config.allow_test === true) {
         app.get('/upload-test', (rq, rs) => sync.fiber(() => {
             let filename = path.resolve(app.root + '/test-upload.jpg');
 
