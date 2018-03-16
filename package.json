@@ -2,7 +2,7 @@
   "name": "in.imgpark",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "start": "nodemon --ignore static --ignore images main.js"
   },
