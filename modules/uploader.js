@@ -90,7 +90,7 @@ module.exports = app => {
         // save file
         sync.await(sim.toFile(write_path, sync.defer()));
 
-        r.payload.url = rq.protocol + '://' + rq.headers.host + '/' + now.getFullYear() + '/' + now.getMonth() + '/' + now.getDay() + '/' + write_filename;
+        r.payload.url = rq.protocol + '://' + rq.headers.host + '/' + now.getFullYear() + '/' + (now.getMonth() + 1) + '/' + now.getDate() + '/' + write_filename;
         return r.set_success(true).set_message('Upload successful!');
     };
 
