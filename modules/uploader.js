@@ -64,7 +64,11 @@ module.exports = app => {
         let now = new Date();
 
         // prepare write path
-        let write_dir = app.root + '/images/' + now.getFullYear() + '/';
+        let write_dir = app.root + '/images/';
+        if (!fs.existsSync(write_dir)) {
+            fs.mkdirSync(write_dir);
+        }
+        write_dir += now.getFullYear() + '/';
         if (!fs.existsSync(write_dir)) {
             fs.mkdirSync(write_dir);
         }
