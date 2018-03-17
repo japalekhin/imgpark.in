@@ -72,11 +72,11 @@ module.exports = app => {
         if (!fs.existsSync(write_dir)) {
             fs.mkdirSync(write_dir);
         }
-        write_dir += now.getMonth() + '/';
+        write_dir += (now.getMonth() + 1) + '/';
         if (!fs.existsSync(write_dir)) {
             fs.mkdirSync(write_dir);
         }
-        write_dir += now.getDay() + '/';
+        write_dir += now.getDate() + '/';
         if (!fs.existsSync(write_dir)) {
             fs.mkdirSync(write_dir);
         }
