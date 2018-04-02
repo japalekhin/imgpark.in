@@ -9,14 +9,12 @@ app.root = path.resolve(__dirname);
 app.use(body_parser.json());
 app.use(body_parser.urlencoded({ extended: true }));
 
-// serve web static assets first
-app.use(express.static('static'));
-
-// then serve images
-app.use(express.static('images'));
+// serve web static assets first then serve images
+app.use(express.static(app.root + '/static'));
+app.use(express.static(app.root + '/images'));
 
 // handle uploads
-require('./modules/uploader.js')(app);
+require(app.root + '/modules/uploader.js')(app);
 
 // finally, handle home and 404
 app.all('/', (rq, rs) => rs.sendFile(path.resolve(app.root + '/index.html')));
