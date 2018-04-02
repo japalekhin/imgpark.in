@@ -60,6 +60,9 @@ module.exports = app => {
             case 'jpeg':
                 extension = 'jpg';
                 break;
+            case 'png':
+                extension = 'png';
+                break;
         }
         let now = new Date();
 
