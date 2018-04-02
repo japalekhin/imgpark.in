@@ -34,7 +34,7 @@ module.exports = app => {
         }
 
         // check content-type
-        if (!['image/jpeg'].includes(file.headers['content-type'])) {
+        if (!['image/jpeg', 'image/png',].includes(file.headers['content-type'])) {
             return r.set_message('Image must be a JPG or PNG! Gave `' + file.headers['content-type'] + '`.');
         }
 
@@ -51,7 +51,7 @@ module.exports = app => {
         let metadata = sync.await(sim.metadata(sync.defer()));
 
         // check content-type (AGAIN!)
-        if (!['jpeg'].includes(metadata.format)) {
+        if (!['jpeg', 'png',].includes(metadata.format)) {
             return r.set_message('Image must be a JPG or PNG! Gave `' + metadata.format + '`.');
         }
 
