@@ -47,7 +47,7 @@ module.exports = app => {
         }
 
         // resize image
-        let sim = sharp(image_data);
+        let sim = sharp(image_data).rotate();
         let metadata = sync.await(sim.metadata(sync.defer()));
 
         // check content-type (AGAIN!)
